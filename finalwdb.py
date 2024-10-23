@@ -5,6 +5,69 @@ import mediapipe as mp  # MediaPipe for face detection
 from cvzone.FaceDetectionModule import FaceDetector  # Face detection module from CVZone
 from cvzone.SerialModule import SerialObject  # Serial communication module from CVZone
 
+import sqlite3
+from datetime import datetime
+
+conn = sqlite3.connect("database/attendance.db")
+db = conn.cursor()
+
+
+# db.execute("""
+#     CREATE TABLE IF NOT EXISTS students (
+#            id INTEGER PRIMARY KEY AUTOINCREMENT,
+#            name TEXT NOT NULL,
+#            image_path TEXT NOT NULL
+#            );
+#     """)
+
+# db.execute("""
+#         CREATE TABLE IF NOT EXISTS class_schedule (
+#            id INTEGER PRIMARY KEY AUTOINCREMENT,
+#            student_id INTEGER,
+#            class_name TEXT NOT NULL,
+#            day_of_week TEXT NOT NULL,
+#            start_time TIME NOT NULL.
+#            end_time TIME NOT NULL,
+#            FOREIGN KEY (student_id) REFERENCES students(id)
+#            );
+#     """)
+
+# db.execute("""
+#         CREATE TABLE IF NOT EXISTS attendance (
+#            id INTEGER FOREIGN KEY,
+#            student_id INTEGER,
+#            date DATE NOT NULL,
+#            attendance_status TEXT NOT NULL,
+#            FOREIGN KEY (student_id) REFERENCES students(id)
+#            );
+#     """)
+
+db.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            class_time TIME NOT NULL
+        );
+""")
+
+db.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY,
+            student_id INTEGER,
+            attendance_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status TEXT,
+           FOREIGN KEY (student_id) REFERENCES students (students_id)       
+           );
+""")
+
+
+# Insert image paths with name (initial set up - adding student data to database)
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")   
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+
 # Initialize the webcam for video capture (default camera at index 0)
 cap = cv2.VideoCapture(0)
 
@@ -17,7 +80,7 @@ detector = FaceDetector()
 arduino = SerialObject('COM3')
 
 # Load the reference image of the known face from the specified path
-known_face_image = cv2.imread("known_face1.jpg")
+known_face_image = cv2.imread(r"C:\Users\HP\Downloads\known_face.jpg")
 
 # Convert the known face image from BGR (OpenCV default) to grayscale
 # Face recognition models often work better with grayscale images
