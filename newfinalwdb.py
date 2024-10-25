@@ -19,7 +19,7 @@ detector = FaceDetector()
 arduino = SerialObject('COM3')
 
 # Connect to the SQLite database
-conn = sqlite3.connect("database/newattendance.db")
+conn = sqlite3.connect("database/finaldb.db")
 cursor = conn.cursor()
 
 # Function to load face encodings from the images stored in the database
@@ -108,6 +108,11 @@ def mark_attendance(student_id, class_id):
 # Load the known face encodings from the database
 known_face_encodings, known_student_ids = load_face_encodings()
 
+last_detection_time = datetime.min
+DETECTION_INTERVAL = 10
+PRINT_INTERVAL = 5  # Set the print interval to 5 seconds
+last_print_time = time.time()
+
 # Start an infinite loop to continuously read frames from the webcam
 while True:
     # Read a frame from the webcam (returns success flag and the frame)
@@ -119,42 +124,48 @@ while True:
     # Detect faces in the current frame using the FaceDetector object
     img, dBoxes = detector.findFaces(img)
 
-    # Check if at least one face is detected
-    if dBoxes:
-        # Extract the bounding box of the first detected face
-        x, y, w, h = dBoxes[0]['bbox']
+    current_time = datetime.now()
+    if (current_time - last_detection_time).seconds >= DETECTION_INTERVAL:      
+        # Check if at least one face is detected
+        if dBoxes:
+            # Extract the bounding box of the first detected face
+            x, y, w, h = dBoxes[0]['bbox']
 
-        # Crop the face region from the original RGB image using the bounding box coordinates
-        face_region = img_rgb[y:y+h, x:x+w]
+            # Crop the face region from the original RGB image using the bounding box coordinates
+            face_region = img_rgb[y:y+h, x:x+w]
 
-        # Convert the cropped face region to grayscale for recognition
-        face_region_gray = cv2.cvtColor(face_region, cv2.COLOR_RGB2GRAY)
+            # Convert the cropped face region to grayscale for recognition
+            face_region_gray = cv2.cvtColor(face_region, cv2.COLOR_RGB2GRAY)
 
-        # Iterate through the known face encodings to find a match
-        for i, face_recognizer in enumerate(known_face_encodings):
-            label, confidence = face_recognizer.predict(face_region_gray)
-            threshold = 100  # Adjust the threshold for confidence
+            # Iterate through the known face encodings to find a match
+            for i, face_recognizer in enumerate(known_face_encodings):
+                label, confidence = face_recognizer.predict(face_region_gray)
+                threshold = 100  # Adjust the threshold for confidence
 
-            if confidence < threshold:
-                student_id = known_student_ids[i]
-                class_id = 1  # Example class ID, you can map this dynamically
-                
-                # Check if the student is registered for the class
-                if is_student_registered(student_id, class_id):
-                    # Mark attendance if the student is registered
-                    mark_attendance(student_id, class_id)
-                    arduino.sendData([0, 1])  # Send data to turn OFF the LED (face recognized)
-                    print(f"Known face detected (Student ID: {student_id}). Attendance marked. LED OFF!")
-                else:
-                    print(f"Student {student_id} not registered for class {class_id}.")
-                break
+                if confidence < threshold:
+                    student_id = known_student_ids[i]
+                    class_id = 2  # Example class ID, you can map this dynamically
+                    
+                    # Check if the student is registered for the class
+                    if is_student_registered(student_id, class_id):
+                        # Mark attendance if the student is registered
+                        mark_attendance(student_id, class_id)
+                        arduino.sendData([0, 1])  # Send data to turn OFF the LED (face recognized)
+                        if time.time() - last_print_time >= PRINT_INTERVAL:
+                            print(f"Known face detected (Student ID: {student_id}). Attendance marked. LED OFF!")
+                            last_print_time = time.time()  # Reset the last print time
+                    else:
+                        print(f"Student {student_id} not registered for class {class_id}.")
+                    break
+            else:
+                arduino.sendData([1, 0])  # Send data to turn ON the LED (unknown face)
+                print("Unknown face detected. LED ON.")
+                last_print_time = time.time()
         else:
-            arduino.sendData([1, 0])  # Send data to turn ON the LED (unknown face)
-            print("Unknown face detected. LED ON.")
-    else:
-        # If no face is detected in the frame, turn ON the LED
-        arduino.sendData([1, 0])
-        print("No face detected. LED ON.")
+            # If no face is detected in the frame, turn ON the LED
+            arduino.sendData([1, 0])
+            print("No face detected. LED ON.")
+            last_print_time = time.time()
 
     # Display the current frame with detected faces in a window
     cv2.imshow("Video", img)
