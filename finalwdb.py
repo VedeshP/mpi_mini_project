@@ -29,14 +29,6 @@ db.execute("""
            );
 """)
 
-
-# Insert image paths with name (initial set up - adding student data to database)
-db.execute("INSERT INTO attendance (name, image_path) VALUES ()")   
-db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
-db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
-db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
-db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
-
 # Initialize the webcam for video capture (default camera at index 0)
 cap = cv2.VideoCapture(0)
 
@@ -116,6 +108,13 @@ while True:
 # Release the webcam and close all OpenCV windows
 cap.release()
 cv2.destroyAllWindows()
+
+# Insert image paths with name (initial set up - adding student data to database)
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")   
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
+db.execute("INSERT INTO attendance (name, image_path) VALUES ()")
 
 # db.execute("""
 #     CREATE TABLE IF NOT EXISTS students (
