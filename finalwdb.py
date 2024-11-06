@@ -11,37 +11,6 @@ from datetime import datetime
 conn = sqlite3.connect("database/attendance.db")
 db = conn.cursor()
 
-
-# db.execute("""
-#     CREATE TABLE IF NOT EXISTS students (
-#            id INTEGER PRIMARY KEY AUTOINCREMENT,
-#            name TEXT NOT NULL,
-#            image_path TEXT NOT NULL
-#            );
-#     """)
-
-# db.execute("""
-#         CREATE TABLE IF NOT EXISTS class_schedule (
-#            id INTEGER PRIMARY KEY AUTOINCREMENT,
-#            student_id INTEGER,
-#            class_name TEXT NOT NULL,
-#            day_of_week TEXT NOT NULL,
-#            start_time TIME NOT NULL.
-#            end_time TIME NOT NULL,
-#            FOREIGN KEY (student_id) REFERENCES students(id)
-#            );
-#     """)
-
-# db.execute("""
-#         CREATE TABLE IF NOT EXISTS attendance (
-#            id INTEGER FOREIGN KEY,
-#            student_id INTEGER,
-#            date DATE NOT NULL,
-#            attendance_status TEXT NOT NULL,
-#            FOREIGN KEY (student_id) REFERENCES students(id)
-#            );
-#     """)
-
 db.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY,
@@ -147,3 +116,33 @@ while True:
 # Release the webcam and close all OpenCV windows
 cap.release()
 cv2.destroyAllWindows()
+
+# db.execute("""
+#     CREATE TABLE IF NOT EXISTS students (
+#            id INTEGER PRIMARY KEY AUTOINCREMENT,
+#            name TEXT NOT NULL,
+#            image_path TEXT NOT NULL
+#            );
+#     """)
+
+# db.execute("""
+#         CREATE TABLE IF NOT EXISTS class_schedule (
+#            id INTEGER PRIMARY KEY AUTOINCREMENT,
+#            student_id INTEGER,
+#            class_name TEXT NOT NULL,
+#            day_of_week TEXT NOT NULL,
+#            start_time TIME NOT NULL.
+#            end_time TIME NOT NULL,
+#            FOREIGN KEY (student_id) REFERENCES students(id)
+#            );
+#     """)
+
+# db.execute("""
+#         CREATE TABLE IF NOT EXISTS attendance (
+#            id INTEGER FOREIGN KEY,
+#            student_id INTEGER,
+#            date DATE NOT NULL,
+#            attendance_status TEXT NOT NULL,
+#            FOREIGN KEY (student_id) REFERENCES students(id)
+#            );
+#     """)
